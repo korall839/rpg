@@ -1,6 +1,6 @@
 import random
 import time
-import helper
+import yn_helper as helper
 print("                     ДИСКЛЕЙМЕК")
 print("перед началом игры нужно поставить англискую раскладку и выключить капслок")
 time.sleep(5)
@@ -74,6 +74,7 @@ if helper.App_helper.loadApp("save/istoria") == "нет сохранения" or
 else:
 	start=0
 	hp,mhp,cheker,pari,pari_all,max_shote,monet,map_num,act=helper.App_helper.loadApp("save/istoria")
+	max_shote=helper.App_helper.loadApp("save/.realrecord/record")
 	print("\x1b[A\r                                                    ")
 	time.sleep(1)
 	print("\x1b[A\r\x1b[A\r                                                    ")
@@ -84,47 +85,44 @@ else:
 	time.sleep(1)
 def game(hp,mhp,pari,u_enemy,hp_enemy,unit,cheker,magic):
 	n=0
+	ws=0
+	check=""
 	if cheker != 0:
-		print(f"артефакт показывает что противник наносит {u_enemy} урона")
+		check=f"артефакт показывает что противник наносит {u_enemy} урона\n"
+		ws=1
 		if magic == 1:
-			print("и он ещё показывает большое присутствие магии")
+			check+="и он ещё показывает большое присутствие магии\n"
+			ws=2
 	while hp > 0 and hp_enemy > 0:
 		if cheker != 0:
-			print(f"артефакт показывает что у противника {hp_enemy} здоровья")
-		print(f"у тебя {hp}/{mhp} хп")
+			check+=f"артефакт показывает что у противника {hp_enemy} здоровья\n"
 		pari_time=0
 		if n != 0:
 			n-=1
-		print("твои действия:\n  атаковать-1\n  защитится-2\n  проверить-3")
 		if pari == 0:
-			print(" ???-4")
+			a=" ???"
 		elif pari == 2:
-			print("  парировать-4")
+			a="  парировать"
 		elif pari == 1:
-			print("  дабл хит-4")
+			a="  дабл хит"
 		elif pari == 3:
-			print("  контр-атака-4")
+			a="  контр-атака"
 		else :
-			print("  атака-щитом-4")
-		print("  сильное лечение-5")
-		i=0
-		while i == 0:
-			try:
-			    i=int(input("действие: "))
-			except ValueError:
-				print("ты чё думал сломать игру? ВЫБИРАЙ ЗАНОВО")
-		if i==1:
+			a="  атака-щитом"
+		i=helper.Menu_helper.menu("w","s","e",f"{check}у тебя {hp}/{mhp} хп\nтвои действия:",2 + (1 if cheker != 0 else 0) + ws,"  атаковать","  защитится","  проверить",a,"  сильное лечение")
+		ws=0
+		if i==0:
 			u=random.randint(10,15)
 			print(f"ты атакуешь врага и наносишь: {u} урона")
 			hp_enemy-=u
-		elif i==2:
+		elif i==1:
 			print("на следуйщие 2 хода урон понижен в 2 раза")
 			if magic ==1:
 				print("изза магии защита стала менее эфективной")
 			n=2
-		elif i==3:
+		elif i==2:
 			print(f"{unit}: {hp_enemy} хп и урон {u_enemy} ")
-		elif i==4:
+		elif i==3:
 			if pari==2:
 				print("ты парируещь атаку противника после мини игры")
 				pari_time=1
@@ -139,7 +137,7 @@ def game(hp,mhp,pari,u_enemy,hp_enemy,unit,cheker,magic):
 				pari_time=4
 			else:
 				print("ты ничего не сделал...")
-		elif i==5:
+		elif i==4:
 			q=random.randint(15,32)
 			if hp+q > mhp:
 				q=mhp-hp
@@ -322,6 +320,9 @@ def game(hp,mhp,pari,u_enemy,hp_enemy,unit,cheker,magic):
 					hp-=u_enemy
 				else:
 					print("удача! враг промахнулся")
+		check=""
+		h=0
+		time.sleep(3)
 	return hp
 def shop(monet,pari,pari_all,hp,mhp,n):
 	i=0
@@ -496,8 +497,8 @@ map_pb=[
 |  .3  ~  ~ \\_/~\\__/ .7  \\
 |   \\ ~      ~       |    \\____
 |    |-\\_.5/-\\___/\\--•6---\\__.8\\
-| ~  .4      /~\\__/-/___/-/____/
-|-----------/
+| ~  .4      /~\\__/-/ / /-/____/
+|-----------/\\     /_.9/
   3-проход к поселению людей
   4-магазин техника
   5-аванпост людей
@@ -604,6 +605,7 @@ while t > 0:
 			helper.App_helper.saveApp("save/istoria",[hp,mhp,cheker,pari,pari_all,max_shote,monet,map_num,act])
 			exit()
 	elif this == 2:
+		map_num[0]=0
 		if map_num[1] == 0:
 			print("тебя обучили здешнему искуству и дали 2 кусок карты поселения людей")
 			map_num[1]+=1
@@ -647,6 +649,7 @@ while t > 0:
 		monet,pari,pari_all,hp,mhp=shop(monet,pari,pari_all,hp,mhp,1)
 		map_num[0]=1
 	elif this == 5:
+		map_num[0]=1
 		if map_num[2] == 0:
 			print("тебе в аванпосте дают артефакт, 20 монет, зелье жизни, кусок карты поля боя и переходишь из вступления в 1 акт")
 			hp+=10
